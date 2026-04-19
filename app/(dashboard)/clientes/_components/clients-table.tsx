@@ -4,7 +4,9 @@ import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   flexRender,
+  type ColumnDef,
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { columns } from "./columns";
@@ -17,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import type { Client } from "@/types/database.types";
 
 export function ClientsTable({ data }: { data: Client[] }) {
@@ -29,6 +32,10 @@ export function ClientsTable({ data }: { data: Client[] }) {
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 10 },
+    },
   });
 
   return (
@@ -83,6 +90,8 @@ export function ClientsTable({ data }: { data: Client[] }) {
           </TableBody>
         </Table>
       </div>
+
+      <DataTablePagination table={table} />
     </div>
   );
 }

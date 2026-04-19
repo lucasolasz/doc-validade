@@ -1,6 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table";
+import { useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,16 +18,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DocumentStatusBadge } from "@/app/(dashboard)/clientes/[id]/_components/document-status-badge";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import type { DocumentWithStatus } from "@/types/database.types";
 
 const statusRowColor: Record<string, string> = {
-  expired: "bg-red-50 hover:bg-red-100",
-  critical: "bg-orange-50 hover:bg-orange-100",
-  warning: "bg-yellow-50 hover:bg-yellow-100",
-  ok: "hover:bg-muted/50",
+  expired: "bg-red-50 hover:bg-red-100 cursor-pointer",
+  critical: "bg-orange-50 hover:bg-orange-100 cursor-pointer",
+  warning: "bg-yellow-50 hover:bg-yellow-100 cursor-pointer",
+  ok: "hover:bg-muted/50 cursor-pointer",
 };
 
 interface ExpiringDocumentsProps {
@@ -31,7 +40,7 @@ export function ExpiringDocuments({
   documents,
   activeStatus,
 }: ExpiringDocumentsProps) {
-  const [search, setSearch] = useState("");
+  const [globalFilter, setGlobalFilter] = useState("");
   const router = useRouter();
 
   const statusFilters = [
@@ -42,23 +51,70 @@ export function ExpiringDocuments({
     { key: "ok", label: "Válidos" },
   ];
 
-  const filtered = documents.filter((doc) => {
-    const matchSearch =
-      doc.client_nome.toLowerCase().includes(search.toLowerCase()) ||
-      doc.numero.toLowerCase().includes(search.toLowerCase()) ||
-      (doc.tipo ?? "").toLowerCase().includes(search.toLowerCase());
+  const filtered = useMemo(() => {
+    return documents.filter((doc) => {
+      const matchStatus = !activeStatus || doc.status === activeStatus;
+      return matchStatus;
+    });
+  }, [documents, activeStatus]);
 
-    const matchStatus = !activeStatus || doc.status === activeStatus;
+  const columns: ColumnDef<DocumentWithStatus>[] = useMemo(
+    () => [
+      {
+        accessorKey: "client_nome",
+        header: "Cliente",
+        cell: ({ row }) => (
+          <span className="font-medium">{row.original.client_nome}</span>
+        ),
+      },
+      {
+        accessorKey: "client_cnpj",
+        header: "CNPJ",
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm">
+            {row.original.client_cnpj}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "numero",
+        header: "Documento",
+      },
+      {
+        accessorKey: "tipo",
+        header: "Tipo",
+        cell: ({ row }) => row.original.tipo ?? "—",
+      },
+      {
+        accessorKey: "data_validade",
+        header: "Validade",
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <DocumentStatusBadge dataValidade={row.original.data_validade} />
+        ),
+      },
+    ],
+    [],
+  );
 
-    return matchSearch && matchStatus;
+  const table = useReactTable({
+    data: filtered,
+    columns,
+    state: { globalFilter },
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 10 },
+    },
   });
 
   function handleStatusFilter(key: string) {
-    if (key) {
-      router.push(`/?status=${key}`);
-    } else {
-      router.push("/");
-    }
+    router.push(key ? `/?status=${key}` : "/");
   }
 
   return (
@@ -66,11 +122,10 @@ export function ExpiringDocuments({
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <Input
           placeholder="Buscar por cliente, número ou tipo..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
         />
-
         <div className="flex gap-2 flex-wrap">
           {statusFilters.map((f) => (
             <Button
@@ -92,41 +147,43 @@ export function ExpiringDocuments({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Cliente</TableHead>
-              <TableHead>CNPJ</TableHead>
-              <TableHead>Documento</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Validade</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
+            {table.getHeaderGroups().map((hg) => (
+              <TableRow key={hg.id}>
+                {hg.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
-            {filtered.length > 0 ? (
-              filtered.map((doc) => (
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
                 <TableRow
-                  key={doc.id}
-                  className={`cursor-pointer ${statusRowColor[doc.status]}`}
-                  onClick={() => router.push(`/clientes/${doc.client_id}`)}
+                  key={row.id}
+                  className={statusRowColor[row.original.status]}
+                  onClick={() =>
+                    router.push(`/clientes/${row.original.client_id}`)
+                  }
                 >
-                  <TableCell className="font-medium">
-                    {doc.client_nome}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
-                    {doc.client_cnpj}
-                  </TableCell>
-                  <TableCell>{doc.numero}</TableCell>
-                  <TableCell>{doc.tipo ?? "—"}</TableCell>
-                  <TableCell>{doc.data_validade}</TableCell>
-                  <TableCell>
-                    <DocumentStatusBadge dataValidade={doc.data_validade} />
-                  </TableCell>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={columns.length}
                   className="text-center text-muted-foreground py-8"
                 >
                   Nenhum documento encontrado
@@ -137,9 +194,7 @@ export function ExpiringDocuments({
         </Table>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Mostrando {filtered.length} de {documents.length} documentos
-      </p>
+      <DataTablePagination table={table} />
     </div>
   );
 }
