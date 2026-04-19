@@ -69,6 +69,21 @@ export type Database = {
   };
 };
 
+export type DocumentWithStatus = {
+  id: string;
+  client_id: string;
+  numero: string;
+  tipo: string | null;
+  data_emissao: string | null;
+  data_validade: string;
+  created_at: string;
+  client_nome: string;
+  client_cnpj: string;
+  client_telefone: string | null;
+  dias_para_vencer: number;
+  status: "expired" | "critical" | "warning" | "ok";
+};
+
 // Helpers para facilitar o uso nos componentes
 export type Client = Database["public"]["Tables"]["clients"]["Row"];
 export type ClientInsert = Database["public"]["Tables"]["clients"]["Insert"];
