@@ -34,8 +34,8 @@ export function ClientDialog({ client, trigger }: ClientDialogProps) {
         toast.success("Cliente criado!");
       }
       setOpen(false);
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao salvar cliente");
+    } catch {
+      toast.error("Erro ao salvar cliente");
     }
   }
 

@@ -15,6 +15,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import type { Document } from "@/types/database.types";
+import { Spinner } from "@/components/ui/spinner";
 
 export function DocumentRow({
   doc,
@@ -24,6 +25,7 @@ export function DocumentRow({
   clientId: string;
 }) {
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const {
     register,
@@ -45,18 +47,20 @@ export function DocumentRow({
       await updateDocument(doc.id, clientId, data);
       toast.success("Documento atualizado!");
       setEditing(false);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch {
+      toast.error("Erro ao atualizar documento");
     }
   }
 
   async function handleDelete() {
     if (!confirm("Excluir este documento?")) return;
     try {
+      setDeleting(true);
       await deleteDocument(doc.id, clientId);
       toast.success("Documento excluído");
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch {
+      toast.error("Erro ao excluir documento");
+      setDeleting(false);
     }
   }
 
@@ -104,7 +108,11 @@ export function DocumentRow({
               onClick={handleSubmit(handleSave)}
               disabled={isSubmitting}
             >
-              <Check className="h-4 w-4 text-green-600" />
+              {isSubmitting ? (
+                <Spinner />
+              ) : (
+                <Check className="h-4 w-4 text-green-600" />
+              )}
             </Button>
             <Button size="icon" variant="ghost" onClick={handleCancel}>
               <X className="h-4 w-4 text-muted-foreground" />
@@ -129,8 +137,17 @@ export function DocumentRow({
           <Button size="icon" variant="ghost" onClick={() => setEditing(true)}>
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ghost" onClick={handleDelete}>
-            <Trash2 className="h-4 w-4 text-destructive" />
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            {deleting ? (
+              <Spinner />
+            ) : (
+              <Trash2 className="h-4 w-4 text-destructive" />
+            )}
           </Button>
         </div>
       </TableCell>

@@ -1,23 +1,7 @@
 "use client";
 
-import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  flexRender,
-  type ColumnDef,
-} from "@tanstack/react-table";
-import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  documentSchema,
-  type DocumentFormData,
-} from "@/lib/validations/document";
-import { createDocument } from "@/lib/actions/documents";
-import { DocumentRow } from "./document-row";
-import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Button } from "@/components/ui/button";
+import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -27,9 +11,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, X, Check } from "lucide-react";
-import { toast } from "sonner";
+import { createDocument } from "@/lib/actions/documents";
+import {
+  documentSchema,
+  type DocumentFormData,
+} from "@/lib/validations/document";
 import type { Document } from "@/types/database.types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  useReactTable,
+  type ColumnDef,
+} from "@tanstack/react-table";
+import { Check, Plus, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { DocumentRow } from "./document-row";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DocumentsTableProps {
   documents: Document[];
@@ -82,8 +82,8 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
       toast.success("Documento adicionado!");
       reset();
       setAddingNew(false);
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch {
+      toast.error("Erro ao adicionar Documento");
     }
   }
 
@@ -177,7 +177,11 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                       onClick={handleSubmit(handleAddNew)}
                       disabled={isSubmitting}
                     >
-                      <Check className="h-4 w-4 text-green-600" />
+                      {isSubmitting ? (
+                        <Spinner />
+                      ) : (
+                        <Check className="h-4 w-4 text-green-600" />
+                      )}
                     </Button>
                     <Button
                       size="icon"

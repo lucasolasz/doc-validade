@@ -1,12 +1,13 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { clientSchema, type ClientFormData } from "@/lib/validations/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { clientSchema, type ClientFormData } from "@/lib/validations/client";
 import type { Client } from "@/types/database.types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 interface ClientFormProps {
   defaultValues?: Partial<Client>;
@@ -71,7 +72,13 @@ export function ClientForm({
           Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Salvando..." : "Salvar"}
+          {isSubmitting ? (
+            <>
+              <Spinner className="mr-2" /> Salvando...
+            </>
+          ) : (
+            "Salvar"
+          )}
         </Button>
       </div>
     </form>

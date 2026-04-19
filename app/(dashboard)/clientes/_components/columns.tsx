@@ -8,6 +8,8 @@ import type { Client } from "@/types/database.types";
 import { toast } from "sonner";
 import { Pencil, Trash2, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export const columns: ColumnDef<Client>[] = [
   {
@@ -32,20 +34,20 @@ export const columns: ColumnDef<Client>[] = [
 
 function RowActions({ client }: { client: Client }) {
   const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
-    if (
-      !confirm(`Excluir ${client.nome}? Todos os documentos serão removidos.`)
-    )
-      return;
+    if (!confirm(`Excluir ${client.nome}?`)) return;
     try {
+      setDeleting(true);
       await deleteClient(client.id);
       toast.success("Cliente excluído");
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch {
+      toast.error("Ocorreu um erro ao apagar o cliente");
+    } finally {
+      setDeleting(false); // Dica: use o finally para evitar repetir código
     }
   }
-
   return (
     <div className="flex justify-end gap-1">
       <Button
@@ -68,9 +70,13 @@ function RowActions({ client }: { client: Client }) {
         variant="ghost"
         size="icon"
         onClick={handleDelete}
-        title="Excluir"
+        disabled={deleting}
       >
-        <Trash2 className="h-4 w-4 text-destructive" />
+        {deleting ? (
+          <Spinner />
+        ) : (
+          <Trash2 className="h-4 w-4 text-destructive" />
+        )}
       </Button>
     </div>
   );
