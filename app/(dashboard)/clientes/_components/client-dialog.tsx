@@ -53,7 +53,7 @@ export function ClientDialog({ client, trigger }: ClientDialogProps) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent aria-describedby="Editar ou adicionar um novo cliente">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Editar cliente" : "Novo cliente"}
