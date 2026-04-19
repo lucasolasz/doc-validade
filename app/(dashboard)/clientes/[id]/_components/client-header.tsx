@@ -24,10 +24,10 @@ export function ClientHeader({ client }: { client: Client }) {
       <ClientDialog
         client={client}
         trigger={
-          <Button variant="outline" size="sm">
+          <>
             <Pencil className="h-4 w-4 mr-1" />
             Editar cliente
-          </Button>
+          </>
         }
       />
     </div>

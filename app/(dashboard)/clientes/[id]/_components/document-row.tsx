@@ -134,14 +134,20 @@ export function DocumentRow({
       </TableCell>
       <TableCell>
         <div className="flex gap-1 justify-end">
-          <Button size="icon" variant="ghost" onClick={() => setEditing(true)}>
-            <Pencil className="h-4 w-4" />
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setEditing(true)}
+            className="cursor-pointer"
+          >
+            <Pencil className="h-4 w-4 " />
           </Button>
           <Button
             size="icon"
             variant="ghost"
             onClick={handleDelete}
             disabled={deleting}
+            className="cursor-pointer"
           >
             {deleting ? (
               <Spinner />

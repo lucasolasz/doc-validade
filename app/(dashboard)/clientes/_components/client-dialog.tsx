@@ -42,8 +42,17 @@ export function ClientDialog({ client, trigger }: ClientDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ?? <Button>Novo cliente</Button>}
+        {/* Se o 'trigger' existir, ele renderiza o Button com o conteúdo do trigger.
+           Se não, renderiza o Button padrão "Novo cliente".
+        */}
+        <Button
+          variant={isEditing ? "outline" : "default"}
+          size={isEditing ? "sm" : "default"}
+        >
+          {trigger ?? "Novo cliente"}
+        </Button>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
