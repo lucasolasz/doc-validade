@@ -1,6 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { getClients } from "@/lib/actions/clients";
-import { ClientsTable } from "./_components/clients-table";
 import { ClientDialog } from "./_components/client-dialog";
+import { ClientsTable } from "./_components/clients-table";
+import { Plus } from "lucide-react";
 
 export default async function ClientesPage() {
   const clients = await getClients();
@@ -14,7 +16,13 @@ export default async function ClientesPage() {
             {clients.length} cadastrado(s)
           </p>
         </div>
-        <ClientDialog />
+        <ClientDialog
+          trigger={
+            <Button>
+              <Plus /> Novo cliente
+            </Button>
+          }
+        />
       </div>
 
       <ClientsTable data={clients} />

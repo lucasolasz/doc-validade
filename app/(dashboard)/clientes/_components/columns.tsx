@@ -58,14 +58,7 @@ function RowActions({ client }: { client: Client }) {
       >
         <FileText className="h-4 w-4" />
       </Button>
-      <ClientDialog
-        client={client}
-        trigger={
-          <Button variant="ghost" size="icon" title="Editar">
-            <Pencil className="h-4 w-4" />
-          </Button>
-        }
-      />
+      <ClientDialog client={client} trigger={<Pencil className="h-4 w-4" />} />
       <Button
         variant="ghost"
         size="icon"
