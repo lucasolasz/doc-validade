@@ -44,6 +44,8 @@ export type Database = {
           data_validade: string;
           created_at: string;
           updated_at: string;
+          file_url: string | null;
+          file_name: string | null;
         };
         Insert: {
           id?: string;
@@ -54,6 +56,8 @@ export type Database = {
           data_validade: string;
           created_at?: string;
           updated_at?: string;
+          file_url?: string | null;
+          file_name?: string | null;
         };
         Update: {
           id?: string;
@@ -63,6 +67,8 @@ export type Database = {
           data_emissao?: string | null;
           data_validade?: string;
           updated_at?: string;
+          file_url?: string | null;
+          file_name?: string | null;
         };
       };
     };

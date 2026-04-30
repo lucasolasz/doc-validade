@@ -16,6 +16,7 @@ import { Pencil, Trash2, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import type { Document } from "@/types/database.types";
 import { Spinner } from "@/components/ui/spinner";
+import { DocumentFileCell } from "./document-file-cell";
 
 export function DocumentRow({
   doc,
@@ -99,7 +100,8 @@ export function DocumentRow({
             </p>
           )}
         </TableCell>
-        <TableCell />
+        <TableCell /> {/* status */}
+        <TableCell /> {/* arquivo — desabilitado durante edição */}
         <TableCell>
           <div className="flex gap-1 justify-end">
             <Button
@@ -133,6 +135,9 @@ export function DocumentRow({
         <DocumentStatusBadge dataValidade={doc.data_validade} />
       </TableCell>
       <TableCell>
+        <DocumentFileCell doc={doc} clientId={clientId} /> {/* ← NOVO */}
+      </TableCell>
+      <TableCell>
         <div className="flex gap-1 justify-end">
           <Button
             size="icon"
@@ -140,7 +145,7 @@ export function DocumentRow({
             onClick={() => setEditing(true)}
             className="cursor-pointer"
           >
-            <Pencil className="h-4 w-4 " />
+            <Pencil className="h-4 w-4" />
           </Button>
           <Button
             size="icon"

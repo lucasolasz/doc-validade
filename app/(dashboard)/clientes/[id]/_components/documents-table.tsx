@@ -119,6 +119,7 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
               <TableHead>Emissão</TableHead>
               <TableHead>Validade</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Arquivo</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -168,7 +169,8 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                     </p>
                   )}
                 </TableCell>
-                <TableCell />
+                <TableCell /> {/* status */}
+                <TableCell /> {/* arquivo — só disponível após salvar */}
                 <TableCell>
                   <div className="flex gap-1 justify-end">
                     <Button
@@ -180,7 +182,7 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                       {isSubmitting ? (
                         <Spinner />
                       ) : (
-                        <Check className="h-4 w-4 text-green-600 " />
+                        <Check className="h-4 w-4 text-green-600" />
                       )}
                     </Button>
                     <Button
@@ -202,7 +204,7 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
               : !addingNew && (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={7}
                       className="text-center text-muted-foreground py-8"
                     >
                       Nenhum documento cadastrado. Clique em + Adicionar
