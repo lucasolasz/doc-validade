@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { Client } from "@/types/database.types";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 import { ClientDialog } from "../../_components/client-dialog";
 
@@ -24,9 +24,9 @@ export function ClientHeader({ client }: { client: Client }) {
       <ClientDialog
         client={client}
         trigger={
-          <Button className="bg-yellow-400 text-black">
-            <Pencil /> Editar cliente
-          </Button>
+          <span className="flex items-center bg-yellow-400 text-black gap-1 px-4 py-2 rounded-full">
+            <Pencil size={15} /> Editar cliente
+          </span>
         }
       />
     </div>

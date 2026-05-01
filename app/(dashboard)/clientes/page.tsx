@@ -1,8 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { getClients } from "@/lib/actions/clients";
+import { Plus } from "lucide-react";
 import { ClientDialog } from "./_components/client-dialog";
 import { ClientsTable } from "./_components/clients-table";
-import { Plus } from "lucide-react";
 
 export default async function ClientesPage() {
   const clients = await getClients();
@@ -18,9 +17,9 @@ export default async function ClientesPage() {
         </div>
         <ClientDialog
           trigger={
-            <Button>
-              <Plus /> Novo cliente
-            </Button>
+            <span className="flex items-center bg-black text-white gap-1 px-4 py-2 rounded-full">
+              <Plus size={15} /> Novo cliente
+            </span>
           }
         />
       </div>

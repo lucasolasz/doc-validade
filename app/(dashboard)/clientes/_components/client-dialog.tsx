@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,12 +7,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { ClientForm } from "./client-form";
 import { createClient_, updateClient } from "@/lib/actions/clients";
-import type { Client } from "@/types/database.types";
 import type { ClientFormData } from "@/lib/validations/client";
+import type { Client } from "@/types/database.types";
+import { useState } from "react";
 import { toast } from "sonner";
+import { ClientForm } from "./client-form";
 
 interface ClientDialogProps {
   client?: Client; // se vier, é edição; se não, é criação
