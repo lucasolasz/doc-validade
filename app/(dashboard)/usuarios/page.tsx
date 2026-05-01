@@ -12,9 +12,30 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { Plus } from "lucide-react";
 import { UserDialog } from "./_components/user-dialog";
 import { UserActions } from "./_components/user-actions";
+import { redirect } from "next/navigation";
 
 export default async function UsuariosPage() {
   const supabase = await createClient();
+
+  // Obtém o usuário logado atualmente
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // Busca o perfil do usuário logado para verificar a permissão
+  const { data: currentUserProfile } = await supabase
+    .from("profiles")
+    .select("perfil")
+    .eq("id", user.id)
+    .single();
+
+  if (currentUserProfile?.perfil !== "desenvolvedor") {
+    redirect("/"); // Redireciona caso não tenha o perfil de desenvolvedor
+  }
 
   // Cria o client com poderes de Admin para acessar a lista de usuários da Auth
   const supabaseAdmin = createAdminClient(

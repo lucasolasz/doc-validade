@@ -3,18 +3,41 @@
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
-const links = [
+const baseLinks = [
   { href: "/", label: "Dashboard" },
   { href: "/clientes", label: "Clientes" },
-  { href: "/usuarios", label: "Usuários" },
 ];
 
 export function NavLinks() {
   const pathname = usePathname();
   const router = useRouter();
   const [loadingHref, setLoadingHref] = useState<string | null>(null);
+  const [isDeveloper, setIsDeveloper] = useState(false);
+
+  useEffect(() => {
+    async function checkUserRole() {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("perfil")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.perfil === "desenvolvedor") {
+          setIsDeveloper(true);
+        }
+      }
+    }
+    checkUserRole();
+  }, []);
 
   async function handleClick(href: string) {
     if (pathname === href) return;
@@ -24,9 +47,15 @@ export function NavLinks() {
     setTimeout(() => setLoadingHref(null), 2000);
   }
 
+  // Monta a lista de links final baseada no perfil
+  const visibleLinks = [...baseLinks];
+  if (isDeveloper) {
+    visibleLinks.push({ href: "/usuarios", label: "Usuários" });
+  }
+
   return (
     <div className="flex gap-1">
-      {links.map((link) => {
+      {visibleLinks.map((link) => {
         const active =
           link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
         const isLoading = loadingHref === link.href;
