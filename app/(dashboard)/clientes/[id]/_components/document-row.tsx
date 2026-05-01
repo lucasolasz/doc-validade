@@ -24,6 +24,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatDate, parseDate } from "@/lib/utils/dateUtil";
@@ -74,7 +85,6 @@ export function DocumentRow({
   }
 
   async function handleDelete() {
-    if (!confirm("Excluir este documento?")) return;
     try {
       setDeleting(true);
       await deleteDocument(doc.id, clientId);
@@ -219,19 +229,40 @@ export function DocumentRow({
           >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="cursor-pointer"
-          >
-            {deleting ? (
-              <Spinner />
-            ) : (
-              <Trash2 className="h-4 w-4 text-destructive" />
-            )}
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                disabled={deleting}
+                className="cursor-pointer"
+              >
+                {deleting ? (
+                  <Spinner />
+                ) : (
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                )}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="max-w-sm">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir documento?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. O documento será removido
+                  permanentemente.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </TableCell>
     </TableRow>

@@ -10,6 +10,17 @@ import { Pencil, Trash2, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const columns: ColumnDef<Client>[] = [
   {
@@ -37,7 +48,6 @@ function RowActions({ client }: { client: Client }) {
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
-    if (!confirm(`Excluir ${client.nome}?`)) return;
     try {
       setDeleting(true);
       await deleteClient(client.id);
@@ -59,18 +69,35 @@ function RowActions({ client }: { client: Client }) {
         <FileText className="h-4 w-4" />
       </Button>
       <ClientDialog client={client} trigger={<Pencil className="h-4 w-4" />} />
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleDelete}
-        disabled={deleting}
-      >
-        {deleting ? (
-          <Spinner />
-        ) : (
-          <Trash2 className="h-4 w-4 text-destructive" />
-        )}
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="icon" disabled={deleting}>
+            {deleting ? (
+              <Spinner />
+            ) : (
+              <Trash2 className="h-4 w-4 text-destructive" />
+            )}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente o
+              cliente {client.nome}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
