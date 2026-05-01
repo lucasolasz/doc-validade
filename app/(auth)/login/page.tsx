@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -37,7 +38,15 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-sm space-y-6 p-8">
-        <div className="space-y-1">
+        <div className=" flex flex-col items-center space-y-4 ">
+          <Image
+            src="/image_login.jpg"
+            alt="Logo"
+            width={120}
+            height={120}
+            priority
+            unoptimized
+          />
           <h1 className="text-2xl font-semibold">Entrar</h1>
         </div>
 
