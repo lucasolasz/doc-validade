@@ -26,17 +26,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-function parseDate(dateStr?: string) {
-  if (!dateStr) return undefined;
-  const [year, month, day] = dateStr.split("-");
-  return new Date(Number(year), Number(month) - 1, Number(day));
-}
-
-function formatDate(date?: string) {
-  if (!date) return "—";
-  return format(parseDate(date)!, "dd/MM/yyyy", { locale: ptBR });
-}
+import { formatDate, parseDate } from "@/lib/utils/dateUtil";
 
 function toISO(date: Date | undefined) {
   if (!date) return "";

@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import type { DocumentWithStatus } from "@/types/database.types";
+import { formatDate } from "@/lib/utils/dateUtil";
 
 const statusRowColor: Record<string, string> = {
   expired: "bg-red-50 hover:bg-red-100 cursor-pointer",
@@ -88,6 +89,7 @@ export function ExpiringDocuments({
       {
         accessorKey: "data_validade",
         header: "Validade",
+        cell: ({ row }) => formatDate(row.original.data_validade),
       },
       {
         accessorKey: "status",
