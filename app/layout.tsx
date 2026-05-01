@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GH System - Controle de Documentos",
+  title: "GA SOLUÇÕES - Controle de Documentos",
   description: "Controle de validade de documentos para clientes",
 };
 
