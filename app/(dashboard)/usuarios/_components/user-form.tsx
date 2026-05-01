@@ -16,11 +16,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
 interface UserFormProps {
+  defaultValues?: Partial<UserFormData>;
+  isEditing?: boolean;
   onSubmit: (data: UserFormData) => Promise<void>;
   onCancel: () => void;
 }
 
-export function UserForm({ onSubmit, onCancel }: UserFormProps) {
+export function UserForm({
+  defaultValues,
+  isEditing,
+  onSubmit,
+  onCancel,
+}: UserFormProps) {
   const {
     register,
     control,
@@ -28,7 +35,7 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
-    defaultValues: {
+    defaultValues: defaultValues || {
       nome: "",
       email: "",
       password: "",
@@ -64,11 +71,15 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="password">Senha Inicial *</Label>
+        <Label htmlFor="password">
+          {isEditing ? "Nova Senha" : "Senha Inicial *"}
+        </Label>
         <Input
           id="password"
           type="password"
-          placeholder="******"
+          placeholder={
+            isEditing ? "(Deixe em branco para não alterar)" : "******"
+          }
           {...register("password")}
         />
         {errors.password && (
@@ -114,6 +125,8 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
             <>
               <Spinner className="mr-2" /> Cadastrando...
             </>
+          ) : isEditing ? (
+            "Salvar Alterações"
           ) : (
             "Cadastrar Usuário"
           )}

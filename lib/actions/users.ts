@@ -37,3 +37,52 @@ export async function createUserAdmin(data: UserFormData) {
 
   revalidatePath("/usuarios");
 }
+
+export async function updateUserAdmin(id: string, data: UserFormData) {
+  // 1. Prepara a atualização da autenticação (apenas atualiza a senha se ela for preenchida)
+  const authUpdates: { email?: string; password?: string } = {
+    email: data.email,
+  };
+
+  if (data.password && data.password.trim() !== "") {
+    authUpdates.password = data.password;
+  }
+
+  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+    id,
+    authUpdates,
+  );
+
+  if (authError) {
+    throw new Error(authError.message);
+  }
+
+  // 2. Atualiza os dados complementares na tabela profiles
+  const { error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .update({
+      nome: data.nome,
+      perfil: data.perfil,
+    })
+    .eq("id", id);
+
+  if (profileError) {
+    throw new Error(profileError.message);
+  }
+
+  revalidatePath("/usuarios");
+}
+
+export async function deleteUserAdmin(id: string) {
+  // Remove o perfil (caso não haja ON DELETE CASCADE configurado no banco)
+  await supabaseAdmin.from("profiles").delete().eq("id", id);
+
+  // Remove o usuário do auth do Supabase
+  const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
+
+  if (authError) {
+    throw new Error(authError.message);
+  }
+
+  revalidatePath("/usuarios");
+}
