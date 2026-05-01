@@ -169,8 +169,8 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                     </p>
                   )}
                 </TableCell>
-                <TableCell /> {/* status */}
-                <TableCell /> {/* arquivo — só disponível após salvar */}
+                <TableCell />
+                <TableCell />
                 <TableCell>
                   <div className="flex gap-1 justify-end">
                     <Button

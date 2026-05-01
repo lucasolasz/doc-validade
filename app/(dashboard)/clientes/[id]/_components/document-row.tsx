@@ -100,8 +100,8 @@ export function DocumentRow({
             </p>
           )}
         </TableCell>
-        <TableCell /> {/* status */}
-        <TableCell /> {/* arquivo — desabilitado durante edição */}
+        <TableCell />
+        <TableCell />
         <TableCell>
           <div className="flex gap-1 justify-end">
             <Button
