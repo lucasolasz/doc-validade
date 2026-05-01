@@ -8,6 +8,7 @@ import { useState } from "react";
 const links = [
   { href: "/", label: "Dashboard" },
   { href: "/clientes", label: "Clientes" },
+  { href: "/usuarios", label: "Usuários" },
 ];
 
 export function NavLinks() {
