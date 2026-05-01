@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import type { Client } from "@/types/database.types";
-import { ArrowLeft, Pencil, Plus } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { ClientDialog } from "../../_components/client-dialog";
 

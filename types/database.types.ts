@@ -17,6 +17,7 @@ export type Database = {
           telefone: string | null;
           created_at: string;
           updated_at: string;
+          drive_folder_id: string | null;
         };
         Insert: {
           id?: string;
@@ -25,6 +26,7 @@ export type Database = {
           telefone?: string | null;
           created_at?: string;
           updated_at?: string;
+          drive_folder_id?: string | null;
         };
         Update: {
           id?: string;
@@ -32,6 +34,7 @@ export type Database = {
           cnpj?: string;
           telefone?: string | null;
           updated_at?: string;
+          drive_folder_id?: string | null;
         };
       };
       documents: {

@@ -7,8 +7,8 @@ import { Readable } from "stream";
 
 function getGoogleAuth() {
   const auth = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
   );
 
   auth.setCredentials({
@@ -27,19 +27,42 @@ export async function uploadFileToDrive(formData: FormData) {
     throw new Error("Dados incompletos para upload");
   }
 
-  // Converte File para Buffer
+  // Busca o drive_folder_id do cliente
+  const supabase = await createClient();
+  const { data: client } = await supabase
+    .from("clients")
+    .select("drive_folder_id, nome")
+    .eq("id", clientId)
+    .single();
+
+  // Se não tiver pasta ainda, cria agora
+  let folderId = client?.drive_folder_id;
+
+  if (!folderId) {
+    try {
+      folderId = await createClientFolder(client?.nome ?? clientId);
+
+      // Salva o folder_id no cliente
+      await supabase
+        .from("clients")
+        .update({ drive_folder_id: folderId })
+        .eq("id", clientId);
+    } catch {
+      // Fallback para pasta raiz se falhar
+      folderId = process.env.GOOGLE_DRIVE_FOLDER_ID!;
+    }
+  }
+
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  // Autentica no Google Drive
   const auth = getGoogleAuth();
   const drive = google.drive({ version: "v3", auth });
 
-  // Faz o upload
   const response = await drive.files.create({
     requestBody: {
       name: file.name,
-      parents: [process.env.GOOGLE_DRIVE_FOLDER_ID!],
+      parents: [folderId], // ← pasta do cliente
     },
     media: {
       mimeType: file.type,
@@ -51,7 +74,6 @@ export async function uploadFileToDrive(formData: FormData) {
   const fileId = response.data.id!;
   const fileName = response.data.name!;
 
-  // Torna o arquivo público para download
   await drive.permissions.create({
     fileId,
     requestBody: {
@@ -60,11 +82,8 @@ export async function uploadFileToDrive(formData: FormData) {
     },
   });
 
-  // URL direta de download
   const fileUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
-  // Salva no Supabase
-  const supabase = await createClient();
   const { error } = await supabase
     .from("documents")
     .update({ file_url: fileUrl, file_name: fileName })
@@ -113,4 +132,20 @@ export async function deleteFileFromDrive(
     .eq("id", documentId);
 
   revalidatePath(`/clientes/${clientId}`);
+}
+
+export async function createClientFolder(clientName: string): Promise<string> {
+  const auth = getGoogleAuth();
+  const drive = google.drive({ version: "v3", auth });
+
+  const response = await drive.files.create({
+    requestBody: {
+      name: clientName,
+      mimeType: "application/vnd.google-apps.folder",
+      parents: [process.env.GOOGLE_DRIVE_FOLDER_ID!],
+    },
+    fields: "id",
+  });
+
+  return response.data.id!;
 }

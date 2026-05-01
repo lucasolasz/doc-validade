@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type { ClientInsert, ClientUpdate } from "@/types/database.types";
+import { createClientFolder } from "./upload";
 
 export async function getClients() {
   const supabase = await createClient();
@@ -32,7 +33,18 @@ export async function getClientById(id: string) {
 export async function createClient_(payload: ClientInsert) {
   const supabase = await createClient();
 
-  const { error } = await supabase.from("clients").insert(payload);
+  // Cria a pasta no Drive com o nome do cliente
+  let drive_folder_id: string | null = null;
+  try {
+    drive_folder_id = await createClientFolder(payload.nome);
+  } catch {
+    // Se falhar no Drive não bloqueia o cadastro
+    console.error("Erro ao criar pasta no Drive");
+  }
+
+  const { error } = await supabase
+    .from("clients")
+    .insert({ ...payload, drive_folder_id });
 
   if (error) throw new Error(error.message);
   revalidatePath("/clientes");
