@@ -1,7 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
+  // ← era "middleware"
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -26,16 +27,19 @@ export async function middleware(request: NextRequest) {
   );
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  // Redireciona para login se não autenticado
-  if (!user && !request.nextUrl.pathname.startsWith("/login")) {
+  const isLoginPage = request.nextUrl.pathname.startsWith("/login");
+  const isApiRoute = request.nextUrl.pathname.startsWith("/api");
+
+  if (isApiRoute) return supabaseResponse;
+
+  if (!session && !isLoginPage) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Redireciona para dashboard se já logado e tentou acessar /login
-  if (user && request.nextUrl.pathname.startsWith("/login")) {
+  if (session && isLoginPage) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -43,5 +47,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/check-env).*)"],
 };
