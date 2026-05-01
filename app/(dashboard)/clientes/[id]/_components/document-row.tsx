@@ -12,11 +12,36 @@ import { DocumentStatusBadge } from "./document-status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Pencil, Trash2, Check, X } from "lucide-react";
+import { Pencil, Trash2, Check, X, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import type { Document } from "@/types/database.types";
 import { Spinner } from "@/components/ui/spinner";
 import { DocumentFileCell } from "./document-file-cell";
+
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+function parseDate(dateStr?: string) {
+  if (!dateStr) return undefined;
+  const [year, month, day] = dateStr.split("-");
+  return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
+function formatDate(date?: string) {
+  if (!date) return "—";
+  return format(parseDate(date)!, "dd/MM/yyyy", { locale: ptBR });
+}
+
+function toISO(date: Date | undefined) {
+  if (!date) return "";
+  return date.toLocaleDateString("sv-SE");
+}
 
 export function DocumentRow({
   doc,
@@ -32,6 +57,8 @@ export function DocumentRow({
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<DocumentFormData>({
     resolver: zodResolver(documentSchema),
@@ -42,6 +69,9 @@ export function DocumentRow({
       data_validade: doc.data_validade,
     },
   });
+
+  const dataEmissao = watch("data_emissao");
+  const dataValidade = watch("data_validade");
 
   async function handleSave(data: DocumentFormData) {
     try {
@@ -81,6 +111,7 @@ export function DocumentRow({
             </p>
           )}
         </TableCell>
+
         <TableCell>
           <Input {...register("tipo")} className="h-8" />
           {errors.tipo && (
@@ -89,19 +120,70 @@ export function DocumentRow({
             </p>
           )}
         </TableCell>
+
         <TableCell>
-          <Input type="date" {...register("data_emissao")} className="h-8" />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dataEmissao
+                  ? format(parseDate(dataEmissao)!, "dd/MM/yyyy", {
+                      locale: ptBR,
+                    })
+                  : "Selecionar data"}
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                captionLayout="dropdown"
+                selected={parseDate(dataEmissao)}
+                onSelect={(date) => setValue("data_emissao", toISO(date))}
+              />
+            </PopoverContent>
+          </Popover>
         </TableCell>
+
         <TableCell>
-          <Input type="date" {...register("data_validade")} className="h-8" />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dataValidade
+                  ? format(parseDate(dataValidade)!, "dd/MM/yyyy", {
+                      locale: ptBR,
+                    })
+                  : "Selecionar data"}
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                captionLayout="dropdown"
+                selected={parseDate(dataValidade)}
+                onSelect={(date) => setValue("data_validade", toISO(date))}
+              />
+            </PopoverContent>
+          </Popover>
+
           {errors.data_validade && (
             <p className="text-xs text-destructive mt-1">
               {errors.data_validade.message}
             </p>
           )}
         </TableCell>
+
         <TableCell />
         <TableCell />
+
         <TableCell>
           <div className="flex gap-1 justify-end">
             <Button
@@ -129,13 +211,13 @@ export function DocumentRow({
     <TableRow>
       <TableCell className="font-medium">{doc.numero}</TableCell>
       <TableCell>{doc.tipo ?? "—"}</TableCell>
-      <TableCell>{doc.data_emissao ?? "—"}</TableCell>
-      <TableCell>{doc.data_validade}</TableCell>
+      <TableCell>{formatDate(doc.data_emissao)}</TableCell>
+      <TableCell>{formatDate(doc.data_validade)}</TableCell>
       <TableCell>
         <DocumentStatusBadge dataValidade={doc.data_validade} />
       </TableCell>
       <TableCell>
-        <DocumentFileCell doc={doc} clientId={clientId} /> {/* ← NOVO */}
+        <DocumentFileCell doc={doc} clientId={clientId} />
       </TableCell>
       <TableCell>
         <div className="flex gap-1 justify-end">

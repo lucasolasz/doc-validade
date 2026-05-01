@@ -43,7 +43,7 @@ export type Database = {
           client_id: string;
           numero: string;
           tipo: string | null;
-          data_emissao: string | null;
+          data_emissao: string;
           data_validade: string;
           created_at: string;
           updated_at: string;
@@ -55,7 +55,7 @@ export type Database = {
           client_id: string;
           numero: string;
           tipo?: string | null;
-          data_emissao?: string | null;
+          data_emissao?: string;
           data_validade: string;
           created_at?: string;
           updated_at?: string;
@@ -67,7 +67,7 @@ export type Database = {
           client_id?: string;
           numero?: string;
           tipo?: string | null;
-          data_emissao?: string | null;
+          data_emissao?: string;
           data_validade?: string;
           updated_at?: string;
           file_url?: string | null;
