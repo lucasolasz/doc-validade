@@ -24,12 +24,26 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus, X, CalendarIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { DocumentRow } from "./document-row";
 import { Spinner } from "@/components/ui/spinner";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { parseDate } from "@/lib/utils/dateUtil";
+
+function toISO(date: Date | undefined) {
+  if (!date) return "";
+  return date.toLocaleDateString("sv-SE");
+}
 
 interface DocumentsTableProps {
   documents: Document[];
@@ -43,6 +57,8 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<DocumentFormData>({
     resolver: zodResolver(documentSchema),
@@ -53,6 +69,9 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
       data_validade: "",
     },
   });
+
+  const dataEmissao = watch("data_emissao");
+  const dataValidade = watch("data_validade");
 
   // Colunas dummy só para o TanStack Table funcionar com paginação
   // A renderização real é feita pelo DocumentRow
@@ -151,18 +170,58 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Input
-                    type="date"
-                    {...register("data_emissao")}
-                    className="h-8"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={`w-full justify-start text-left font-normal h-8 px-3 ${!dataEmissao && "text-muted-foreground"}`}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dataEmissao
+                          ? format(parseDate(dataEmissao)!, "dd/MM/yyyy", {
+                              locale: ptBR,
+                            })
+                          : "Selecionar data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        captionLayout="dropdown"
+                        selected={parseDate(dataEmissao)}
+                        onSelect={(date) =>
+                          setValue("data_emissao", toISO(date))
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </TableCell>
                 <TableCell>
-                  <Input
-                    type="date"
-                    {...register("data_validade")}
-                    className="h-8"
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={`w-full justify-start text-left font-normal h-8 px-3 ${!dataValidade && "text-muted-foreground"}`}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dataValidade
+                          ? format(parseDate(dataValidade)!, "dd/MM/yyyy", {
+                              locale: ptBR,
+                            })
+                          : "Selecionar data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        captionLayout="dropdown"
+                        selected={parseDate(dataValidade)}
+                        onSelect={(date) =>
+                          setValue("data_validade", toISO(date))
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
                   {errors.data_validade && (
                     <p className="text-xs text-destructive mt-1">
                       {errors.data_validade.message}
