@@ -83,10 +83,13 @@ export function UserForm({ onSubmit, onCancel }: UserFormProps) {
           name="perfil"
           render={({ field }) => (
             <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <SelectTrigger id="perfil">
+              <SelectTrigger id="perfil" className="w-full">
                 <SelectValue placeholder="Selecione um perfil" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="desenvolvedor">
+                  Desenvolvedor (Acesso Sistema)
+                </SelectItem>
                 <SelectItem value="admin">
                   Administrador (Acesso Total)
                 </SelectItem>
