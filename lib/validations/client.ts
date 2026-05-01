@@ -23,12 +23,22 @@ function validateCNPJ(cnpj: string): boolean {
 }
 
 export const clientSchema = z.object({
-  nome: z.string().min(2, "Nome deve ter ao menos 2 caracteres"),
+  nome: z.string().min(1, "Nome obrigatório"),
+
   cnpj: z
     .string()
     .min(1, "CNPJ obrigatório")
-    .refine((v) => validateCNPJ(v), "CNPJ inválido"),
-  telefone: z.string().optional(),
-});
+    .regex(
+      /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/,
+      "CNPJ inválido (00.000.000/0000-00)",
+    ),
 
+  telefone: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(val),
+      "Telefone inválido ((99) 99999-9999)",
+    ),
+});
 export type ClientFormData = z.infer<typeof clientSchema>;

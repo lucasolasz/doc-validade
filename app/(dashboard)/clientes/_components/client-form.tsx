@@ -23,6 +23,7 @@ export function ClientForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
@@ -32,6 +33,32 @@ export function ClientForm({
       telefone: defaultValues?.telefone ?? "",
     },
   });
+
+  function maskCNPJ(value: string) {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/, "$1.$2")
+      .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1/$2")
+      .replace(/(\d{4})(\d)/, "$1-$2")
+      .slice(0, 18);
+  }
+
+  function maskPhone(value: string) {
+    value = value.replace(/\D/g, "");
+
+    if (value.length <= 10) {
+      return value
+        .replace(/^(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4})(\d)/, "$1-$2")
+        .slice(0, 14);
+    }
+
+    return value
+      .replace(/^(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .slice(0, 15);
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -49,6 +76,7 @@ export function ClientForm({
           id="cnpj"
           placeholder="00.000.000/0000-00"
           {...register("cnpj")}
+          onChange={(e) => setValue("cnpj", maskCNPJ(e.target.value))}
         />
         {errors.cnpj && (
           <p className="text-sm text-destructive">{errors.cnpj.message}</p>
@@ -61,6 +89,7 @@ export function ClientForm({
           id="telefone"
           placeholder="(11) 99999-9999"
           {...register("telefone")}
+          onChange={(e) => setValue("telefone", maskPhone(e.target.value))}
         />
         {errors.telefone && (
           <p className="text-sm text-destructive">{errors.telefone.message}</p>
