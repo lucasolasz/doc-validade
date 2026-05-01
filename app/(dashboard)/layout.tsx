@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { NavLinks } from "./_components/nav-links";
 import { LogoutButton } from "./_components/logout-button";
+import Link from "next/link";
 
 export default async function DashboardLayout({
   children,
@@ -18,7 +19,12 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       <nav className="border-b px-6 py-4 flex items-center justify-between">
-        <span className="font-semibold text-sm">Controle de Documentos</span>
+        <Link href="/">
+          <span className="font-semibold text-sm">
+            GA SOLUÇÕES - Controle de Documentos
+          </span>
+        </Link>
+
         <div className="flex items-center gap-4">
           <NavLinks />
           <LogoutButton />
