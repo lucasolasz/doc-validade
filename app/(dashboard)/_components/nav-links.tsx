@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 const baseLinks = [
   { href: "/", label: "Dashboard" },
   { href: "/clientes", label: "Clientes" },
+  { href: "/categorias", label: "Categorias" },
 ];
 
 export function NavLinks() {
