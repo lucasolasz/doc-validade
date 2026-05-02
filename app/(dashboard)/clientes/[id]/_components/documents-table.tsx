@@ -25,7 +25,15 @@ import {
   type ColumnDef,
 } from "@tanstack/react-table";
 import { Check, Plus, X, CalendarIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { DocumentRow } from "./document-row";
@@ -52,6 +60,10 @@ interface DocumentsTableProps {
 
 export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
   const [addingNew, setAddingNew] = useState(false);
+  const [tiposDisponiveis, setTiposDisponiveis] = useState<
+    { id: string; descricao: string }[]
+  >([]);
+  const [loadingTipos, setLoadingTipos] = useState(true);
 
   const {
     register,
@@ -72,6 +84,7 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
 
   const dataEmissao = watch("data_emissao");
   const dataValidade = watch("data_validade");
+  const tipoSelecionado = watch("tipo");
 
   // Colunas dummy só para o TanStack Table funcionar com paginação
   // A renderização real é feita pelo DocumentRow
@@ -111,8 +124,39 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
     setAddingNew(false);
   }
 
+  // Carrega os tipos disponíveis
+  useEffect(() => {
+    async function loadTipos() {
+      const supabase = createClient();
+      try {
+        const { data, error } = await supabase
+          .from("tipos_documentos")
+          .select("id,descricao")
+          .order("descricao");
+        if (error) throw error;
+        if (data) setTiposDisponiveis(data);
+      } catch (err) {
+        console.error("Erro ao carregar tipos:", err);
+      } finally {
+        setLoadingTipos(false);
+      }
+    }
+    loadTipos();
+  }, []);
+
   // Pega os documentos da página atual pelo índice
   const paginatedDocs = table.getRowModel().rows.map((row) => row.original);
+
+  // Calcula tipos presentes e faltantes
+  const presentTipoIds = documents
+    .map((d) => d.tipo)
+    .filter(Boolean) as string[];
+  const presentTipos = tiposDisponiveis.filter((t) =>
+    presentTipoIds.includes(t.id),
+  );
+  const missingTipos = tiposDisponiveis.filter(
+    (t) => !presentTipoIds.includes(t.id),
+  );
 
   return (
     <div className="space-y-4">
@@ -130,6 +174,49 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
       </div>
 
       <div className="rounded-md border">
+        <div className="p-3 border-b">
+          <div className="flex gap-4 items-center text-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Preenchidos:</span>
+              {loadingTipos ? (
+                <span className="text-muted-foreground">Carregando...</span>
+              ) : presentTipos.length > 0 ? (
+                <div className="flex gap-2 flex-wrap">
+                  {presentTipos.map((t) => (
+                    <span
+                      key={t.id}
+                      className="px-2 py-0.5 rounded bg-green-100 text-green-800 text-xs"
+                    >
+                      {t.descricao}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-muted-foreground">Nenhum</span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Faltando:</span>
+              {loadingTipos ? (
+                <span className="text-muted-foreground">Carregando...</span>
+              ) : missingTipos.length > 0 ? (
+                <div className="flex gap-2 flex-wrap">
+                  {missingTipos.map((t) => (
+                    <span
+                      key={t.id}
+                      className="px-2 py-0.5 rounded bg-muted text-xs"
+                    >
+                      {t.descricao}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-muted-foreground">Nenhum</span>
+              )}
+            </div>
+          </div>
+        </div>
         <Table>
           <TableHeader>
             <TableRow>
@@ -158,11 +245,25 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Input
-                    {...register("tipo")}
-                    placeholder="Ex: Alvará"
-                    className="h-8"
-                  />
+                  {loadingTipos ? (
+                    <Input placeholder="Carregando tipos..." className="h-8" />
+                  ) : (
+                    <Select
+                      value={tipoSelecionado || ""}
+                      onValueChange={(v) => setValue("tipo", v)}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Selecione o tipo" />
+                      </SelectTrigger>
+                      <SelectContent side="top">
+                        {tiposDisponiveis.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.descricao}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   {errors.tipo && (
                     <p className="text-xs text-destructive mt-1">
                       {errors.tipo.message}
@@ -262,7 +363,12 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
 
             {paginatedDocs.length > 0
               ? paginatedDocs.map((doc) => (
-                  <DocumentRow key={doc.id} doc={doc} clientId={clientId} />
+                  <DocumentRow
+                    key={doc.id}
+                    doc={doc}
+                    clientId={clientId}
+                    tiposDisponiveis={tiposDisponiveis}
+                  />
                 ))
               : !addingNew && (
                   <TableRow>

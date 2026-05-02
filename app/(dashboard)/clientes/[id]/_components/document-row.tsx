@@ -18,6 +18,14 @@ import type { Document } from "@/types/database.types";
 import { Spinner } from "@/components/ui/spinner";
 import { DocumentFileCell } from "./document-file-cell";
 
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -47,9 +55,11 @@ function toISO(date: Date | undefined) {
 export function DocumentRow({
   doc,
   clientId,
+  tiposDisponiveis,
 }: {
   doc: Document;
   clientId: string;
+  tiposDisponiveis?: { id: string; descricao: string }[];
 }) {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -113,7 +123,21 @@ export function DocumentRow({
         </TableCell>
 
         <TableCell>
-          <Input {...register("tipo")} className="h-8" />
+          <Select
+            value={watch("tipo") || ""}
+            onValueChange={(v) => setValue("tipo", v)}
+          >
+            <SelectTrigger className="h-8">
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              {tiposDisponiveis?.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.descricao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {errors.tipo && (
             <p className="text-xs text-destructive mt-1">
               {errors.tipo.message}
@@ -214,7 +238,11 @@ export function DocumentRow({
   return (
     <TableRow>
       <TableCell className="font-medium">{doc.numero}</TableCell>
-      <TableCell>{doc.tipo ?? "—"}</TableCell>
+      <TableCell>
+        {tiposDisponiveis?.find((t) => t.id === doc.tipo)?.descricao ||
+          doc.tipo ||
+          "—"}
+      </TableCell>
       <TableCell>{formatDate(doc.data_emissao)}</TableCell>
       <TableCell>{formatDate(doc.data_validade)}</TableCell>
       <TableCell>
