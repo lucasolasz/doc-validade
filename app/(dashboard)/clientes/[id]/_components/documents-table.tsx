@@ -124,12 +124,50 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
     async function loadTipos() {
       const supabase = createClient();
       try {
-        const { data, error } = await supabase
-          .from("tipos_documentos")
-          .select("id,descricao")
-          .order("descricao");
-        if (error) throw error;
-        if (data) setTiposDisponiveis(data);
+        // Primeiro pega a categoria do cliente
+        const { data: clientData, error: clientError } = await supabase
+          .from("clients")
+          .select("categoria_id")
+          .eq("id", clientId)
+          .single();
+
+        if (clientError) throw clientError;
+
+        const categoriaId = clientData?.categoria_id;
+
+        if (!categoriaId) {
+          // Sem categoria definida: buscar todos os tipos
+          const { data, error } = await supabase
+            .from("tipos_documentos")
+            .select("id,descricao")
+            .order("descricao");
+          if (error) throw error;
+          if (data) setTiposDisponiveis(data);
+        } else {
+          // Busca associações da categoria e depois os tipos correspondentes
+          const { data: relData, error: relError } = await supabase
+            .from("categorias_tipos_documentos")
+            .select("tipo_documento_id")
+            .eq("categoria_id", categoriaId);
+
+          if (relError) throw relError;
+
+          const tipoIds = (relData || []).map(
+            (r: { tipo_documento_id: string }) => r.tipo_documento_id,
+          );
+
+          if (tipoIds.length === 0) {
+            setTiposDisponiveis([]);
+          } else {
+            const { data, error } = await supabase
+              .from("tipos_documentos")
+              .select("id,descricao")
+              .in("id", tipoIds)
+              .order("descricao");
+            if (error) throw error;
+            if (data) setTiposDisponiveis(data);
+          }
+        }
       } catch (err) {
         console.error("Erro ao carregar tipos:", err);
       } finally {
@@ -137,7 +175,7 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
       }
     }
     loadTipos();
-  }, []);
+  }, [clientId]);
 
   // Pega os documentos da página atual pelo índice
   const paginatedDocs = table.getRowModel().rows.map((row) => row.original);
