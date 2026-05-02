@@ -18,13 +18,7 @@ import type { Document } from "@/types/database.types";
 import { Spinner } from "@/components/ui/spinner";
 import { DocumentFileCell } from "./document-file-cell";
 
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
+import CommandSelect from "@/components/ui/command-select";
 
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -123,21 +117,12 @@ export function DocumentRow({
         </TableCell>
 
         <TableCell>
-          <Select
+          <CommandSelect
+            items={tiposDisponiveis ?? []}
             value={watch("tipo") || ""}
             onValueChange={(v) => setValue("tipo", v)}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {tiposDisponiveis?.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.descricao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Selecione o tipo"
+          />
           {errors.tipo && (
             <p className="text-xs text-destructive mt-1">
               {errors.tipo.message}

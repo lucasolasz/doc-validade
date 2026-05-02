@@ -1,8 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import CommandSelect from "@/components/ui/command-select";
 import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -12,6 +20,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { createDocument } from "@/lib/actions/documents";
+import { createClient } from "@/lib/supabase/client";
+import { parseDate } from "@/lib/utils/dateUtil";
 import {
   documentSchema,
   type DocumentFormData,
@@ -24,29 +34,13 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Check, Plus, X, CalendarIcon } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon, Check, Plus, X } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { DocumentRow } from "./document-row";
-import { Spinner } from "@/components/ui/spinner";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { parseDate } from "@/lib/utils/dateUtil";
 
 function toISO(date: Date | undefined) {
   if (!date) return "";
@@ -158,6 +152,8 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
     (t) => !presentTipoIds.includes(t.id),
   );
 
+  const [open, setOpen] = React.useState(false);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -248,21 +244,12 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                   {loadingTipos ? (
                     <Input placeholder="Carregando tipos..." className="h-8" />
                   ) : (
-                    <Select
+                    <CommandSelect
+                      items={tiposDisponiveis}
                       value={tipoSelecionado || ""}
                       onValueChange={(v) => setValue("tipo", v)}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Selecione o tipo" />
-                      </SelectTrigger>
-                      <SelectContent side="top">
-                        {tiposDisponiveis.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
-                            {t.descricao}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      placeholder="Selecione o tipo"
+                    />
                   )}
                   {errors.tipo && (
                     <p className="text-xs text-destructive mt-1">
