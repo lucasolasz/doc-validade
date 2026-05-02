@@ -43,7 +43,7 @@ export function CategoriaDialog({ categoria, trigger }: CategoriaDialogProps) {
     let isMounted = true;
 
     if (open && isEditing && categoria) {
-      const catId = categoria.id;
+      const catId = categoria.id; // Guarda o ID para evitar erro de escopo do TypeScript
       const fetchRelacoes = async () => {
         try {
           const supabase = createClient();
@@ -90,7 +90,7 @@ export function CategoriaDialog({ categoria, trigger }: CategoriaDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         aria-describedby={
