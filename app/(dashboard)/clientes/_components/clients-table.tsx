@@ -54,7 +54,9 @@ export function ClientsTable({ data }: { data: Client[] }) {
             .select("id,descricao")
             .in("id", categoriaIds);
           const cMap: Record<string, string> = {};
-          (cats || []).forEach((c: any) => (cMap[c.id] = c.descricao));
+          (cats || []).forEach((c: { id: string; descricao: string }) => {
+            cMap[c.id] = c.descricao;
+          });
           setCategoryMap(cMap);
 
           // Load associations to count tipos per category
@@ -63,10 +65,12 @@ export function ClientsTable({ data }: { data: Client[] }) {
             .select("categoria_id,tipo_documento_id")
             .in("categoria_id", categoriaIds);
           const totals: Record<string, Set<string>> = {};
-          (rels || []).forEach((r: any) => {
-            totals[r.categoria_id] = totals[r.categoria_id] || new Set();
-            totals[r.categoria_id].add(r.tipo_documento_id);
-          });
+          (rels || []).forEach(
+            (r: { categoria_id: string; tipo_documento_id: string }) => {
+              totals[r.categoria_id] = totals[r.categoria_id] || new Set();
+              totals[r.categoria_id].add(r.tipo_documento_id);
+            },
+          );
           const totalByCat: Record<string, number> = {};
           Object.keys(totals).forEach((k) => (totalByCat[k] = totals[k].size));
           setTotalByCategory(totalByCat);
@@ -79,11 +83,13 @@ export function ClientsTable({ data }: { data: Client[] }) {
             .select("client_id,tipo")
             .in("client_id", clientIds);
           const reg: Record<string, Set<string>> = {};
-          (docs || []).forEach((d: any) => {
-            if (!d.tipo) return;
-            reg[d.client_id] = reg[d.client_id] || new Set();
-            reg[d.client_id].add(d.tipo);
-          });
+          (docs || []).forEach(
+            (d: { client_id: string; tipo: string | null }) => {
+              if (!d.tipo) return;
+              reg[d.client_id] = reg[d.client_id] || new Set();
+              reg[d.client_id].add(d.tipo);
+            },
+          );
           const regCount: Record<string, number> = {};
           Object.keys(reg).forEach((k) => (regCount[k] = reg[k].size));
           setRegisteredByClient(regCount);
@@ -100,13 +106,18 @@ export function ClientsTable({ data }: { data: Client[] }) {
   }, [data]);
 
   const enhancedColumns = useMemo(() => {
-    const [nomeCol, cnpjCol, telefoneCol, actionsCol] = columns as any;
+    // columns.tsx is expected to export columns in the order: nome, cnpj, telefone, actions
+    // Use indices to avoid relying on ColumnDef internals like accessorKey.
+    const nomeCol = columns[0] as ColumnDef<Client>;
+    const cnpjCol = columns[1] as ColumnDef<Client>;
+    const telefoneCol = columns[2] as ColumnDef<Client>;
+    const actionsCol = columns[3] as ColumnDef<Client>;
 
     const categoriaCol: ColumnDef<Client> = {
       id: "categoria",
       header: "Categoria",
       cell: ({ row }) => {
-        const catId = (row.original as any).categoria_id;
+        const catId = row.original.categoria_id;
         return catId ? (categoryMap[catId] ?? "—") : "—";
       },
     };
@@ -116,14 +127,21 @@ export function ClientsTable({ data }: { data: Client[] }) {
       header: "Documentos",
       cell: ({ row }) => {
         const clientId = row.original.id;
-        const catId = (row.original as any).categoria_id;
+        const catId = row.original.categoria_id;
         const registered = registeredByClient[clientId] ?? 0;
         const total = (catId && totalByCategory[catId]) || 0;
         return `${registered}/${total}`;
       },
     };
 
-    return [nomeCol, categoriaCol, docsCol, cnpjCol, telefoneCol, actionsCol];
+    return [
+      nomeCol,
+      categoriaCol,
+      docsCol,
+      cnpjCol,
+      telefoneCol,
+      actionsCol,
+    ] as ColumnDef<Client>[];
   }, [categoryMap, registeredByClient, totalByCategory]);
 
   const table = useReactTable({

@@ -229,7 +229,9 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
         <div className="p-3 border-b">
           <div className="flex gap-4 items-center text-sm">
             <div className="flex items-center gap-2">
-              <span className="font-medium">Preenchidos:</span>
+              <span className="font-medium">
+                Preenchidos ({presentTipos.length}):
+              </span>
               {loadingTipos ? (
                 <span className="text-muted-foreground">Carregando...</span>
               ) : presentTipos.length > 0 ? (
@@ -249,7 +251,9 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="font-medium">Faltando:</span>
+              <span className="font-medium">
+                Faltando ({missingTipos.length}):
+              </span>
               {loadingTipos ? (
                 <span className="text-muted-foreground">Carregando...</span>
               ) : missingTipos.length > 0 ? (
