@@ -42,9 +42,15 @@ export async function createClient_(payload: ClientInsert) {
     console.error("Erro ao criar pasta no Drive");
   }
 
+  const categoria_id =
+    typeof payload.categoria_id === "string" &&
+    payload.categoria_id.trim() !== ""
+      ? payload.categoria_id
+      : null;
+
   const { error } = await supabase
     .from("clients")
-    .insert({ ...payload, drive_folder_id });
+    .insert({ ...payload, categoria_id, drive_folder_id });
 
   if (error) throw new Error(error.message);
   revalidatePath("/clientes");
@@ -53,7 +59,18 @@ export async function createClient_(payload: ClientInsert) {
 export async function updateClient(id: string, payload: ClientUpdate) {
   const supabase = await createClient();
 
-  const { error } = await supabase.from("clients").update(payload).eq("id", id);
+  const categoria_id =
+    typeof payload.categoria_id === "string" &&
+    payload.categoria_id.trim() !== ""
+      ? payload.categoria_id
+      : null;
+
+  const updatePayload = { ...payload, categoria_id };
+
+  const { error } = await supabase
+    .from("clients")
+    .update(updatePayload)
+    .eq("id", id);
 
   if (error) throw new Error(error.message);
   revalidatePath("/clientes");

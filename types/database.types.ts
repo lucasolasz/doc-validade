@@ -15,6 +15,7 @@ export type Database = {
           nome: string;
           cnpj: string;
           telefone: string | null;
+          categoria_id: string | null;
           created_at: string;
           updated_at: string;
           drive_folder_id: string | null;
@@ -24,6 +25,7 @@ export type Database = {
           nome: string;
           cnpj: string;
           telefone?: string | null;
+          categoria_id?: string | null;
           created_at?: string;
           updated_at?: string;
           drive_folder_id?: string | null;
@@ -33,6 +35,7 @@ export type Database = {
           nome?: string;
           cnpj?: string;
           telefone?: string | null;
+          categoria_id?: string | null;
           updated_at?: string;
           drive_folder_id?: string | null;
         };

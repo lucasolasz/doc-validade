@@ -7,7 +7,15 @@ import { Spinner } from "@/components/ui/spinner";
 import { clientSchema, type ClientFormData } from "@/lib/validations/client";
 import type { Client } from "@/types/database.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect, useState } from "react";
 
 interface ClientFormProps {
   defaultValues?: Partial<Client>;
@@ -22,6 +30,7 @@ export function ClientForm({
 }: ClientFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting },
@@ -31,8 +40,31 @@ export function ClientForm({
       nome: defaultValues?.nome ?? "",
       cnpj: defaultValues?.cnpj ?? "",
       telefone: defaultValues?.telefone ?? "",
+      categoria_id: (defaultValues as any)?.categoria_id ?? "",
     },
   });
+
+  const [categorias, setCategorias] = useState<
+    {
+      id: string;
+      descricao: string;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/categorias")
+      .then((r) => r.json())
+      .then((data) => {
+        if (mounted) setCategorias(data || []);
+      })
+      .catch(() => {
+        if (mounted) setCategorias([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   function maskCNPJ(value: string) {
     return value
@@ -94,6 +126,28 @@ export function ClientForm({
         {errors.telefone && (
           <p className="text-sm text-destructive">{errors.telefone.message}</p>
         )}
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="categoria">Categoria</Label>
+        <Controller
+          control={control as any}
+          name="categoria_id"
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <SelectTrigger id="categoria" className="w-full">
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {categorias.map((c) => (
+                  <SelectItem value={c.id} key={c.id}>
+                    {c.descricao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
