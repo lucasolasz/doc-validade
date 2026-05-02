@@ -8,7 +8,7 @@ import {
   flexRender,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -22,6 +22,7 @@ import { DataTablePagination } from "@/components/ui/data-table-pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import type { DocumentWithStatus } from "@/types/database.types";
 import { formatDate } from "@/lib/utils/dateUtil";
 
@@ -59,6 +60,27 @@ export function ExpiringDocuments({
     });
   }, [documents, activeStatus]);
 
+  const [tiposDisponiveis, setTiposDisponiveis] = useState<
+    { id: string; descricao: string }[]
+  >([]);
+
+  useEffect(() => {
+    async function loadTipos() {
+      const supabase = createClient();
+      try {
+        const { data, error } = await supabase
+          .from("tipos_documentos")
+          .select("id,descricao")
+          .order("descricao");
+        if (error) throw error;
+        if (data) setTiposDisponiveis(data);
+      } catch (err) {
+        console.error("Erro ao carregar tipos:", err);
+      }
+    }
+    loadTipos();
+  }, []);
+
   const columns: ColumnDef<DocumentWithStatus>[] = useMemo(
     () => [
       {
@@ -84,7 +106,11 @@ export function ExpiringDocuments({
       {
         accessorKey: "tipo",
         header: "Tipo",
-        cell: ({ row }) => row.original.tipo ?? "—",
+        cell: ({ row }) =>
+          row.original.tipo_descricao ||
+          tiposDisponiveis.find((t) => t.id === row.original.tipo)?.descricao ||
+          row.original.tipo ||
+          "—",
       },
       {
         accessorKey: "data_validade",

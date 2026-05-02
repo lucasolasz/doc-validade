@@ -37,5 +37,34 @@ export async function getExpiringDocuments(
   const { data, error } = await query;
 
   if (error) throw new Error(error.message);
-  return data as DocumentWithStatus[];
+  // Load tipos_documentos descricoes for documents that have a tipo
+  const tipoIds = Array.from(
+    new Set(
+      (data as DocumentWithStatus[])
+        .map((d) => d.tipo)
+        .filter(Boolean) as string[],
+    ),
+  );
+
+  let tiposMap: Record<string, string> = {};
+  if (tipoIds.length > 0) {
+    const { data: tiposData, error: tiposError } = await supabase
+      .from("tipos_documentos")
+      .select("id,descricao")
+      .in("id", tipoIds as string[]);
+    if (tiposError) throw new Error(tiposError.message);
+    if (tiposData) {
+      tiposMap = Object.fromEntries(
+        (tiposData as { id: string; descricao: string }[]).map((t) => [
+          t.id,
+          t.descricao,
+        ]),
+      );
+    }
+  }
+
+  return (data as DocumentWithStatus[]).map((d) => ({
+    ...d,
+    tipo_descricao: d.tipo ? (tiposMap[d.tipo] ?? null) : null,
+  }));
 }

@@ -86,6 +86,7 @@ export type DocumentWithStatus = {
   client_id: string;
   numero: string;
   tipo: string | null;
+  tipo_descricao?: string | null;
   data_emissao: string | null;
   data_validade: string;
   created_at: string;

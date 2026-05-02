@@ -27,6 +27,19 @@ export async function getClientById(id: string) {
     .single();
 
   if (error) throw new Error(error.message);
+  // Se o cliente tem uma categoria associada, busca a descrição dessa categoria
+  if (data && data.categoria_id) {
+    const { data: catData, error: catError } = await supabase
+      .from("categorias")
+      .select("descricao")
+      .eq("id", data.categoria_id)
+      .single();
+
+    if (catError) throw new Error(catError.message);
+
+    return { ...data, categoria_descricao: catData?.descricao ?? null };
+  }
+
   return data;
 }
 

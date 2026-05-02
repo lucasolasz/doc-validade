@@ -4,7 +4,11 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import Link from "next/link";
 import { ClientDialog } from "../../_components/client-dialog";
 
-export function ClientHeader({ client }: { client: Client }) {
+export function ClientHeader({
+  client,
+}: {
+  client: Client & { categoria_descricao?: string | null };
+}) {
   return (
     <div className="flex items-start justify-between">
       <div className="flex items-center gap-3">
@@ -18,6 +22,8 @@ export function ClientHeader({ client }: { client: Client }) {
           <p className="text-sm text-muted-foreground">
             CNPJ: {client.cnpj}
             {client.telefone && ` · Tel: ${client.telefone}`}
+            {client.categoria_descricao &&
+              ` · Categoria: ${client.categoria_descricao}`}
           </p>
         </div>
       </div>
