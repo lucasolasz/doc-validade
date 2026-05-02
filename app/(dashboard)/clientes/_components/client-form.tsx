@@ -8,6 +8,7 @@ import { clientSchema, type ClientFormData } from "@/lib/validations/client";
 import type { Client } from "@/types/database.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { createClient } from "@/lib/supabase/client";
 import {
   Select,
   SelectContent,
@@ -40,7 +41,8 @@ export function ClientForm({
       nome: defaultValues?.nome ?? "",
       cnpj: defaultValues?.cnpj ?? "",
       telefone: defaultValues?.telefone ?? "",
-      categoria_id: (defaultValues as any)?.categoria_id ?? "",
+      categoria_id:
+        (defaultValues as { categoria_id?: string })?.categoria_id ?? "",
     },
   });
 
@@ -53,14 +55,23 @@ export function ClientForm({
 
   useEffect(() => {
     let mounted = true;
-    fetch("/api/categorias")
-      .then((r) => r.json())
-      .then((data) => {
-        if (mounted) setCategorias(data || []);
-      })
-      .catch(() => {
+    const supabase = createClient();
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("categorias")
+          .select("*")
+          .order("descricao", { ascending: true });
+        if (!mounted) return;
+        if (error) {
+          setCategorias([]);
+          return;
+        }
+        setCategorias(data || []);
+      } catch (e) {
         if (mounted) setCategorias([]);
-      });
+      }
+    })();
     return () => {
       mounted = false;
     };
@@ -131,10 +142,13 @@ export function ClientForm({
       <div className="space-y-1">
         <Label htmlFor="categoria">Categoria</Label>
         <Controller
-          control={control as any}
+          control={control}
           name="categoria_id"
           render={({ field }) => (
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select
+              onValueChange={field.onChange}
+              defaultValue={field.value ?? undefined}
+            >
               <SelectTrigger id="categoria" className="w-full">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
