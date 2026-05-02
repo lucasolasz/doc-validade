@@ -139,6 +139,8 @@ export function DocumentRow({
 
             <PopoverContent className="w-auto p-0">
               <Calendar
+                fromYear={1900}
+                toYear={2200}
                 mode="single"
                 captionLayout="dropdown"
                 selected={parseDate(dataEmissao)}
@@ -168,6 +170,8 @@ export function DocumentRow({
               <Calendar
                 mode="single"
                 captionLayout="dropdown"
+                fromYear={1900}
+                toYear={2200}
                 selected={parseDate(dataValidade)}
                 onSelect={(date) => setValue("data_validade", toISO(date))}
               />

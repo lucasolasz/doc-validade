@@ -186,6 +186,8 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
+                        fromYear={1900}
+                        toYear={2200}
                         mode="single"
                         captionLayout="dropdown"
                         selected={parseDate(dataEmissao)}
@@ -213,6 +215,8 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
+                        fromYear={1900}
+                        toYear={2200}
                         mode="single"
                         captionLayout="dropdown"
                         selected={parseDate(dataValidade)}
