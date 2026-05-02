@@ -10,6 +10,7 @@ const baseLinks = [
   { href: "/", label: "Dashboard" },
   { href: "/clientes", label: "Clientes" },
   { href: "/categorias", label: "Categorias" },
+  { href: "/tipodocumento", label: "Tipos de Documentos" },
 ];
 
 export function NavLinks() {
