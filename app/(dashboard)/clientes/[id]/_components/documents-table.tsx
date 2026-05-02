@@ -36,7 +36,7 @@ import {
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Check, Plus, X } from "lucide-react";
+import { CalendarIcon, Check, Plus, X, Copy, FileText } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -154,6 +154,48 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
 
   const [open, setOpen] = React.useState(false);
 
+  function generatePlainText() {
+    const hoje = format(new Date(), "dd/MM/yyyy");
+    const present =
+      presentTipos.map((t) => `- ${t.descricao}`).join("\n") || "- Nenhum";
+    const missing =
+      missingTipos.map((t) => `- ${t.descricao}`).join("\n") || "- Nenhum";
+
+    return `Assunto: Documentos necessários — ${hoje}\n\nPreenchidos:\n${present}\n\nFaltando:\n${missing}`;
+  }
+
+  function generateMarkdown() {
+    const hoje = format(new Date(), "dd/MM/yyyy");
+    const present =
+      presentTipos.map((t) => `- ${t.descricao}`).join("\n") || "- Nenhum";
+    const missing =
+      missingTipos.map((t) => `- ${t.descricao}`).join("\n") || "- Nenhum";
+
+    return `**Assunto:** Documentos necessários — ${hoje}\n\n**Preenchidos:**\n${present}\n\n**Faltando:**\n${missing}`;
+  }
+
+  async function copyAsPlain() {
+    try {
+      await navigator.clipboard.writeText(generatePlainText());
+      toast.success("Texto copiado para a área de transferência");
+      setOpen(false);
+    } catch (err) {
+      toast.error("Erro ao copiar");
+      console.error(err);
+    }
+  }
+
+  async function copyAsMarkdown() {
+    try {
+      await navigator.clipboard.writeText(generateMarkdown());
+      toast.success("Markdown copiado para a área de transferência");
+      setOpen(false);
+    } catch (err) {
+      toast.error("Erro ao copiar");
+      console.error(err);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -211,6 +253,39 @@ export function DocumentsTable({ documents, clientId }: DocumentsTableProps) {
                 <span className="text-muted-foreground">Nenhum</span>
               )}
             </div>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-auto"
+                  disabled={loadingTipos}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copiar
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56">
+                <div className="flex flex-col gap-2 p-2">
+                  <Button
+                    variant="ghost"
+                    onClick={copyAsPlain}
+                    className="justify-start"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copiar para WhatsApp (texto)
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={copyAsMarkdown}
+                    className="justify-start"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Copiar para E-mail (Markdown)
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         <Table>
