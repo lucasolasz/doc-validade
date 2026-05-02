@@ -3,13 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import {
   categoriaSchema,
   type CategoriaFormData,
 } from "@/lib/validations/categoria";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -28,6 +29,7 @@ export function CategoriaForm({
 }: CategoriaFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<CategoriaFormData>({
@@ -83,27 +85,40 @@ export function CategoriaForm({
             <Spinner className="mr-2 size-3" /> Carregando tipos...
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded-md p-3 max-h-48 overflow-y-auto">
-            {tiposDisponiveis.map((tipo) => (
-              <label
-                key={tipo.id}
-                className="flex items-center gap-2 space-x-2 text-sm cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  value={tipo.id}
-                  {...register("tipos_documentos")}
-                  className="rounded border-gray-300 text-primary focus:ring-primary size-4"
-                />
-                <span className="leading-none">{tipo.descricao}</span>
-              </label>
-            ))}
-            {tiposDisponiveis.length === 0 && (
-              <span className="text-sm text-muted-foreground">
-                Nenhum tipo cadastrado.
-              </span>
+          <Controller
+            control={control}
+            name="tipos_documentos"
+            render={({ field }) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 border rounded-md p-3 max-h-48 overflow-y-auto">
+                {tiposDisponiveis.map((tipo) => (
+                  <div key={tipo.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`tipo-${tipo.id}`}
+                      checked={field.value?.includes(tipo.id)}
+                      onCheckedChange={(checked) => {
+                        return checked
+                          ? field.onChange([...(field.value || []), tipo.id])
+                          : field.onChange(
+                              field.value?.filter((value) => value !== tipo.id),
+                            );
+                      }}
+                    />
+                    <label
+                      htmlFor={`tipo-${tipo.id}`}
+                      className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {tipo.descricao}
+                    </label>
+                  </div>
+                ))}
+                {tiposDisponiveis.length === 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    Nenhum tipo cadastrado.
+                  </span>
+                )}
+              </div>
             )}
-          </div>
+          />
         )}
       </div>
 
