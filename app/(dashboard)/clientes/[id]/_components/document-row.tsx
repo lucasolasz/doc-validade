@@ -71,7 +71,7 @@ export function DocumentRow({
       numero: doc.numero,
       tipo: doc.tipo ?? "",
       data_emissao: doc.data_emissao ?? "",
-      data_validade: doc.data_validade,
+      data_validade: doc.data_validade ?? "",
     },
   });
 

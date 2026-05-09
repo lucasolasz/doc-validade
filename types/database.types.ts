@@ -70,8 +70,8 @@ export type Database = {
           client_id?: string;
           numero?: string;
           tipo?: string | null;
-          data_emissao?: string;
-          data_validade?: string;
+          data_emissao?: string | null;
+          data_validade?: string | null;
           updated_at?: string;
           file_url?: string | null;
           file_name?: string | null;

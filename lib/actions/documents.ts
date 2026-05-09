@@ -17,10 +17,10 @@ export async function getDocumentsByClient(clientId: string) {
   return data;
 }
 
-function sanitizeDocumentPayload<T extends DocumentInsert | DocumentUpdate>(
-  payload: T,
-): T {
-  const sanitized = { ...payload };
+function sanitizeDocumentPayload(
+  payload: DocumentInsert | DocumentUpdate,
+): DocumentInsert | DocumentUpdate {
+  const sanitized = { ...payload } as DocumentInsert | DocumentUpdate;
   if (sanitized.data_validade === "") {
     sanitized.data_validade = null;
   }
