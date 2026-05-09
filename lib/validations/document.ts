@@ -5,11 +5,11 @@ export const documentSchema = z
     numero: z.string().min(1, "Número obrigatório"),
     tipo: z.string().min(1, "Tipo obrigatório"),
     data_emissao: z.string().optional(),
-    data_validade: z.string().min(1, "Data de validade obrigatória"),
+    data_validade: z.string().optional(),
   })
   .refine(
     (data) => {
-      if (!data.data_emissao) return true;
+      if (!data.data_emissao || !data.data_validade) return true;
       return new Date(data.data_emissao) < new Date(data.data_validade);
     },
     {

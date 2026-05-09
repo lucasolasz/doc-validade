@@ -7,7 +7,7 @@ import {
 export function DocumentStatusBadge({
   dataValidade,
 }: {
-  dataValidade: string;
+  dataValidade: string | null;
 }) {
   const status = getValidityStatus(dataValidade);
   const config = statusConfig[status];

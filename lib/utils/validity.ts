@@ -1,8 +1,9 @@
 import { differenceInDays, parseISO } from "date-fns";
 
-export type ValidityStatus = "expired" | "critical" | "warning" | "ok";
+export type ValidityStatus = "expired" | "critical" | "warning" | "ok" | "no_expiry";
 
-export function getValidityStatus(dataValidade: string): ValidityStatus {
+export function getValidityStatus(dataValidade: string | null): ValidityStatus {
+  if (!dataValidade) return "no_expiry";
   const days = differenceInDays(parseISO(dataValidade), new Date());
 
   if (days < 0) return "expired";
@@ -11,7 +12,8 @@ export function getValidityStatus(dataValidade: string): ValidityStatus {
   return "ok";
 }
 
-export function getValidityLabel(dataValidade: string): string {
+export function getValidityLabel(dataValidade: string | null): string {
+  if (!dataValidade) return "Sem validade";
   const days = differenceInDays(parseISO(dataValidade), new Date());
 
   if (days < 0) return `Vencido há ${Math.abs(days)} dias`;
@@ -37,5 +39,9 @@ export const statusConfig = {
   ok: {
     label: "Válido",
     class: "bg-green-100 text-green-800 border-green-200",
+  },
+  no_expiry: {
+    label: "Sem validade",
+    class: "bg-gray-100 text-gray-600 border-gray-200",
   },
 };

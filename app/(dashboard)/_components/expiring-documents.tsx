@@ -31,7 +31,17 @@ const statusRowColor: Record<string, string> = {
   critical: "bg-orange-50 hover:bg-orange-100 cursor-pointer",
   warning: "bg-yellow-50 hover:bg-yellow-100 cursor-pointer",
   ok: "hover:bg-muted/50 cursor-pointer",
+  no_expiry: "hover:bg-muted/50 cursor-pointer",
 };
+
+const statusFilters = [
+  { key: "", label: "Todos" },
+  { key: "expired", label: "Vencidos" },
+  { key: "critical", label: "Críticos" },
+  { key: "warning", label: "A vencer" },
+  { key: "ok", label: "Válidos" },
+  { key: "no_expiry", label: "Sem validade" },
+];
 
 interface ExpiringDocumentsProps {
   documents: DocumentWithStatus[];
@@ -44,14 +54,6 @@ export function ExpiringDocuments({
 }: ExpiringDocumentsProps) {
   const [globalFilter, setGlobalFilter] = useState("");
   const router = useRouter();
-
-  const statusFilters = [
-    { key: "", label: "Todos" },
-    { key: "expired", label: "Vencidos" },
-    { key: "critical", label: "Críticos" },
-    { key: "warning", label: "A vencer" },
-    { key: "ok", label: "Válidos" },
-  ];
 
   const filtered = useMemo(() => {
     return documents.filter((doc) => {

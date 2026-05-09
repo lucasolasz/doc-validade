@@ -46,8 +46,8 @@ export type Database = {
           client_id: string;
           numero: string;
           tipo: string | null;
-          data_emissao: string;
-          data_validade: string;
+          data_emissao: string | null;
+          data_validade: string | null;
           created_at: string;
           updated_at: string;
           file_url: string | null;
@@ -59,7 +59,7 @@ export type Database = {
           numero: string;
           tipo?: string | null;
           data_emissao?: string;
-          data_validade: string;
+          data_validade?: string | null;
           created_at?: string;
           updated_at?: string;
           file_url?: string | null;
@@ -93,8 +93,8 @@ export type DocumentWithStatus = {
   client_nome: string;
   client_cnpj: string;
   client_telefone: string | null;
-  dias_para_vencer: number;
-  status: "expired" | "critical" | "warning" | "ok";
+  dias_para_vencer: number | null;
+  status: "expired" | "critical" | "warning" | "ok" | "no_expiry";
 };
 
 // Helpers para facilitar o uso nos componentes

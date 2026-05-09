@@ -11,16 +11,30 @@ export async function getDocumentsByClient(clientId: string) {
     .from("documents")
     .select("*")
     .eq("client_id", clientId)
-    .order("data_validade", { ascending: true });
+    .order("data_validade", { ascending: true, nullsFirst: false });
 
   if (error) throw new Error(error.message);
   return data;
 }
 
+function sanitizeDocumentPayload<T extends DocumentInsert | DocumentUpdate>(
+  payload: T,
+): T {
+  const sanitized = { ...payload };
+  if (sanitized.data_validade === "") {
+    sanitized.data_validade = null;
+  }
+  if (sanitized.data_emissao === "") {
+    sanitized.data_emissao = null;
+  }
+  return sanitized;
+}
+
 export async function createDocument(payload: DocumentInsert) {
   const supabase = await createClient();
+  const sanitized = sanitizeDocumentPayload(payload);
 
-  const { error } = await supabase.from("documents").insert(payload);
+  const { error } = await supabase.from("documents").insert(sanitized);
 
   if (error) throw new Error(error.message);
   revalidatePath(`/clientes/${payload.client_id}`);
@@ -32,10 +46,11 @@ export async function updateDocument(
   payload: DocumentUpdate,
 ) {
   const supabase = await createClient();
+  const sanitized = sanitizeDocumentPayload(payload);
 
   const { error } = await supabase
     .from("documents")
-    .update(payload)
+    .update(sanitized)
     .eq("id", id);
 
   if (error) throw new Error(error.message);
@@ -53,9 +68,10 @@ export async function deleteDocument(id: string, clientId: string) {
 
 export async function upsertDocuments(docs: DocumentInsert[]) {
   const supabase = await createClient();
+  const sanitized = docs.map(sanitizeDocumentPayload);
 
-  const { error } = await supabase.from("documents").upsert(docs);
+  const { error } = await supabase.from("documents").upsert(sanitized);
 
   if (error) throw new Error(error.message);
-  if (docs[0]?.client_id) revalidatePath(`/clientes/${docs[0].client_id}`);
+  if (sanitized[0]?.client_id) revalidatePath(`/clientes/${sanitized[0].client_id}`);
 }
