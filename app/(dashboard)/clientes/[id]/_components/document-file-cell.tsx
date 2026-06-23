@@ -27,13 +27,14 @@ export function DocumentFileCell({ doc, clientId }: DocumentFileCellProps) {
     inputRef.current?.click();
   }
 
+  const MAX_SIZE_MB = Number(process.env.NEXT_PUBLIC_UPLOAD_MAX_SIZE_MB) || 30;
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Limite de 10MB
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Arquivo muito grande. Máximo 10MB.");
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      toast.error(`Arquivo muito grande. Máximo ${MAX_SIZE_MB}MB.`);
       return;
     }
 
